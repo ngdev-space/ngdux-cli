@@ -30,6 +30,10 @@ export const UPDATE_${nameUpper} = 'UPDATE_${nameUpper}';
 export const UPDATE_${nameUpper}_FAILURE = 'UPDATE_${nameUpper}_FAILURE';
 export const UPDATE_${nameUpper}_SUCCESS = 'UPDATE_${nameUpper}_FAILURE';
 
+export const DELETE_${nameUpper} = 'DELETE_${nameUpper}';
+export const DELETE_${nameUpper}_FAILURE = 'DELETE_${nameUpper}_FAILURE';
+export const DELETE_${nameUpper}_SUCCESS = 'DELETE_${nameUpper}_SUCCESS';
+
 
 export class Get${nameCap} implements Action {
     type = GET_${nameUpper};
@@ -50,6 +54,11 @@ export class Update${nameCap} implements Action {
     constructor(public payload: any) { }
 }
 
+export class Delete${nameCap} implements Action {
+    type = DELETE_${nameUpper};
+    constructor(public payload: any) { }
+}
+
 // Reducer
 const initialState: ${nameCap}State = {
     ${nameLower}s: [],
@@ -67,10 +76,13 @@ export const reducer: ActionReducer<${nameCap}State> = (state: ${nameCap}State =
             return state;
         case CREATE_${nameUpper}_SUCCESS:
             return state;
+        case DELETE_${nameUpper}_SUCCESS:
+            return state;
         case GET_${nameUpper}_FAILURE:
         case GET_${nameUpper}S_FAILURE:
-        case UPDATE_${nameUpper}S_FAILURE:
-        case CREATE_${nameUpper}S_FAILURE:
+        case UPDATE_${nameUpper}_FAILURE:
+        case CREATE_${nameUpper}_FAILURE:
+        case DELETE_${nameUpper}_FAILURE:
             handleError(action.payload);
             return state;
         default:

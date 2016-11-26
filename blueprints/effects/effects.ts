@@ -5,26 +5,21 @@ export const template = (name: string): string => {
     const nameCap = _.capitalize(name);
     const nameLower = name.toLocaleLowerCase();
 return `import { Injectable } from '@angular/core';
-import { Action } from '@ngrx/store';
 import { Effect, Actions } from '@ngrx/effects';
-import { Http } from '@angular/http';
+import { Http, Headers, URLSearchParams } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
 
 import {
     GET_${nameUpper}, GET_${nameUpper}_SUCCESS, GET_${nameUpper}_FAILURE,
     GET_${nameUpper}S, GET_${nameUpper}S_SUCCESS, GET_${nameUpper}S_FAILURE,
     CREATE_${nameUpper}, CREATE_${nameUpper}_SUCCESS, CREATE_${nameUpper}_FAILURE,
-    UPDATE_${nameUpper}, UPDATE_${nameUpper}_SUCCESS, UPDATE_${nameUpper}_FAILURE
+    UPDATE_${nameUpper}, UPDATE_${nameUpper}_SUCCESS, UPDATE_${nameUpper}_FAILURE,
+    DELETE_${nameUpper}, DELETE_${nameUpper}_SUCCESS, DELETE_${nameUpper}_FAILURE,
 } from '../reducers/${nameLower}';
 
 
 @Injectable()
-export class ${name}Effects {
-  	private _url: string = '';
-    constructor(
-      private actions$: Actions,
-      private http: Http
-    ) { }
-
+export class ${nameCap}Effects {
     @Effect() get${nameCap}s$ = this.actions$
       .ofType(GET_${nameUpper}S)
       .map(action => {
@@ -86,6 +81,26 @@ export class ${name}Effects {
             })
             .catch((e) => Observable.of({ type: UPDATE_${nameUpper}_FAILURE, payload: e }))
         );
+    @Effect() delete${nameCap}$ = this.actions$
+        .ofType(DELETE_${nameUpper})
+        .map(action => {
+            let headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            return { headers, body: action.payload };
+        })
+        .switchMap(payload => this.http.delete(this._url, payload)
+            .map(res => {
+                const data = res.json();
+                return { type: DELETE_${nameUpper}_SUCCESS, payload: data };
+            })
+            .catch((e) => Observable.of({ type: DELETE_${nameUpper}_FAILURE, payload: e }))
+        );
 
-}`
-};
+	private _url: string = '';
+
+    constructor(
+      private actions$: Actions,
+      private http: Http
+    ) { }
+}
+`};
