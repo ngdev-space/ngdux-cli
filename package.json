@@ -10,8 +10,12 @@
   "author": "Carlos Vega",
   "license": "MIT",
   "dependencies": {
+    "@types/mkdirp": "^0.3.29",
     "lodash": "^4.17.2",
-    "vorpal": "^1.11.4"
+    "mkdirp": "^0.5.1",
+    "node-ls": "0.0.4",
+    "vorpal": "^1.11.4",
+    "vorpal-autocomplete-fs": "0.0.3"
   },
   "bin": {
     "ngdux-cli": "./index.js"

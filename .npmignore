@@ -1,4 +1,4 @@
-*.js
+*.ts
 *.js.map
 node_modules/
 redux/
