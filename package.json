@@ -1,0 +1,24 @@
+{
+  "name": "ngdux-cli",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "tsc -w"
+  },
+  "author": "Carlos Vega",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.2",
+    "vorpal": "^1.11.4"
+  },
+  "bin": {
+    "ngdux-cli": "./index.js"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.40",
+    "@types/node": "^6.0.51",
+    "typescript": "^2.0.10"
+  }
+}
