@@ -5,8 +5,10 @@ const fsAutocomplete = require('vorpal-autocomplete-fs');
 const chalk = vorpal.chalk;
 const originalPath = process.cwd();
 const ls = require('node-ls');
-
+import { Config } from './lib/config';
 import { Writer } from './lib/writer';
+const writer =  new Writer(vorpal, Config);
+
 
 function currentDirectory(currentDir: string) {
 	const splittedPath = currentDir.split('/');
@@ -18,7 +20,7 @@ vorpal
     .alias('i')
     .autocomplete(fsAutocomplete({ directory: true }))
     .action(function(args, callback) {
-        Writer.createDir(args.name, args.path);
+        writer.createDir(args.name, args.path || originalPath);
         callback();
     });
 
@@ -51,54 +53,77 @@ vorpal
             }
         }
         const dir = process.cwd();
-        let currentDir =`ngdux@${currentDirectory(dir)}$`;
-        vorpal.ui.delimiter(currentDir);
-        vorpal.ui.refresh();
+        let currentDir = chalk.magenta(`ngdux@${currentDirectory(dir)}$`);
+        vorpal.delimiter(currentDir);
         callback();
     });
 
 vorpal
-    .command('bundle [name]', 'Creates a bundle')
+    .command('bundle [name] [path]', 'Creates a bundle')
     .alias('b')
+    .autocomplete(fsAutocomplete({ directory: true }))
     .action(function(args, callback) {
-        Writer.writeBundle(args.name, originalPath)
+        writer.writeBundle(args.name, args.path || originalPath)
         callback();
     });
 
 vorpal
-    .command('duck [name]', 'Creates a "duck" file with CRUD')
+    .command('duck [name] [path]', 'Creates a "duck" file with CRUD')
     .alias('d')
+    .autocomplete(fsAutocomplete({ directory: true }))
+    .option('-d, --default', 'default path')
     .action(function(args, callback) {
-        Writer.writeReducer(args.name, originalPath);
+        let path = parseDirOpts(args);
+        writer.write('reducer', args.name, path, args.options.d);
         callback();
     });
 
 vorpal
-    .command('effect [name]', 'Creates an "effects" file with CRUD')
+    .command('effect [name] [path]', 'Creates an "effects" file with CRUD')
     .alias('e')
+    .autocomplete(fsAutocomplete({ directory: true }))
+    .option('-d, --default', 'default path')
     .action(function(args, callback) {
-        Writer.writeEffect(args.name, originalPath);
+        let path = parseDirOpts(args);
+        writer.write('effect', args.name, path, args.options.d);
         callback();
     });
 
 vorpal
-    .command('model [name]', 'Creates a model file')
+    .command('model [name] [path]', 'Creates a model file')
     .alias('m')
-    .option('-f, --force', 'Force file overwrite.')
+    .autocomplete(fsAutocomplete({ directory: true }))
+    .option('-d, --default', 'default path')
     .action(function(args, callback) {
-        Writer.writeModel(args.name, originalPath);
+        let path = parseDirOpts(args);
+        writer.write('model', args.name, path, args.options.d);
         callback();
     });
 
 vorpal
-    .command('middleware [name]', 'Creates a "middleware" file ')
+    .command('middleware [name] [path]', 'Creates a "middleware" file ')
     .alias('mw')
-    .option('-f, --force', 'Force file overwrite.')
+    .autocomplete(fsAutocomplete({ directory: true }))
+    .option('-d, --default', 'default path')
     .action(function(args, callback) {
-        Writer.writeMiddleware(args.name, originalPath);
+        let path = parseDirOpts(args);
+        writer.write('middleware', args.name, path, !!(args.options.default));
         callback();
     });
 
 vorpal
     .delimiter(chalk.magenta(`ngdux@${currentDirectory(process.cwd())}$`))
     .show();
+
+function parseDirOpts(args) {
+    let path = '';
+	if (args.options.default || !args.path) {
+        path = originalPath;
+    } else {
+        path = args.path;
+        if (path.charAt(path.length-1) === '/') {
+            path = path.slice(0, path.length - 1);
+        }
+    }
+    return path;
+}

@@ -5,71 +5,56 @@ import { template as effectTpl } from '../blueprints/effect/effect';
 import { template as duckTpl } from '../blueprints/reducer/duck';
 import { template as middlewareTpl } from '../blueprints/middleware/middleware';
 import { template as modelTpl } from '../blueprints/model/model';
-import { Config } from './config';
 
-const extension = Config('fileExtension');
 
 export class Writer {
-	private static writeFile(filepath: string, text: string) {	
-		fs.writeFile(filepath, text, function(err) {
-		    if (err) {
-		        return console.log(err);
-		    }
+
+	constructor(private vorpal: any, private config: Function) {}
+
+	private writeFile(filepath: string, text: string) {	
+		fs.writeFile(filepath, text, (err) => {
+		    if (err) { return this.vorpal.log(err); }
+			this.vorpal.log(this.vorpal.chalk.green(`Created ${filepath} file.`));
 		});
 	}
 
-	private static makeDir(path: string, cb?: Function) {
-		mkdirp(path, function (err) {
-		    if (err) {
-				return console.log(err);
-			}
-			if (cb) {
-				cb(true);
-			}
+	private makeDir(path: string, cb?: Function) {
+		mkdirp(path, (err) => {
+		    if (err) { return this.vorpal.log(err); }
+			this.vorpal.log(this.vorpal.chalk.green(`Created ${path} dir.`));
+			if (cb) { cb(true); }
 		});
 	}
 
-	static createDir(dirname: string = Config('rootFolder'), path: string = './') {
+	createDir(dirname: string = this.config('rootFolder'), path: string) {
 		const dirPath = `${path}/${dirname}`;
 		this.makeDir(dirPath, () => {
-			this.makeDir(`${dirPath}/${Config('reducersFolder')}`);
-			this.makeDir(`${dirPath}/${Config('modelsFolder')}`);
-			this.makeDir(`${dirPath}/${Config('middlewaresFolder')}`);
-			this.makeDir(`${dirPath}/${Config('effectsFolder')}`);
+			this.makeDir(`${dirPath}/${this.config('reducer')}`);
+			this.makeDir(`${dirPath}/${this.config('model')}`);
+			this.makeDir(`${dirPath}/${this.config('middleware')}`);
+			this.makeDir(`${dirPath}/${this.config('effect')}`);
 		});
 	}
 
-	static writeBundle(name: string, path: string) {
-		this.writeModel(name, path);
-		this.writeReducer(name, path);
-		this.writeEffect(name, path);
+	writeBundle(name: string, path: string) {
+		this.write('model', name, path, true);
+		this.write('reducer', name, path, true);
+		this.write('effect', name, path, true);
 	}
 
-	static writeEffect(name: string, path: string) {
-	    const innerName = name.toLocaleLowerCase();
-		const text: string = effectTpl(name);
-		let filepath = `${path}/${Config('rootFolder')}/${Config('effectsFolder')}/${innerName}.${extension}`;
-	    this.writeFile(filepath, text);
+	write(template: string, name: string, path: string, def: boolean) {
+		const lname = name.toLocaleLowerCase();
+		const compiledTemplate = this[template](lname, path);
+		const filepath = this.path(template, path, lname, def);
+		this.writeFile(filepath, compiledTemplate);
 	}
 
-	static writeReducer(name: string, path: string) {
-	    const innerName = name.toLocaleLowerCase();
-	    const text: string = duckTpl(name);
-		let filepath = `${path}/${Config('rootFolder')}/${Config('reducersFolder')}/${innerName}.${extension}`;
-	    this.writeFile(filepath, text);
-	}
-
-	static writeModel(name: string, path: string) {
-	    const innerName = name.toLocaleLowerCase();
-	    const text: string = modelTpl(name);
-		let filepath = `${path}/${Config('rootFolder')}/${Config('modelsFolder')}/${innerName}.${extension}`;
-	    this.writeFile(filepath, text);
-	}
-
-	static writeMiddleware(name: string, path: string) {
-	    const innerName = name.toLocaleLowerCase();
-	    const text: string = middlewareTpl(name);
-		let filepath = `${path}/${Config('rootFolder')}/${Config('middlewaresFolder')}/${innerName}.${extension}`;
-	    this.writeFile(filepath, text);
-	}
+	private reducer = (name: string): string => duckTpl(name);
+	private model = (name: string): string => modelTpl(name);
+	private middleware = (name: string): string => middlewareTpl(name);
+	private effect = (name: string): string => effectTpl(name);
+	private path = (template: string, path: string, name: string, def: boolean): string => 
+		(def) ?
+		`${path}/${this.config('rootFolder')}/${this.config()[template]}/${name}.${this.config('fileExtension')}`:
+		`${path}/${name}.${this.config('fileExtension')}`;
 }
