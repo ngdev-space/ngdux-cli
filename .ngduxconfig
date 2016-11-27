@@ -1,8 +1,0 @@
-{
-    "fileExtension": "ts",
-    "rootFolder": "redux",
-    "effect": "effects",
-    "model": "models",
-    "reducer": "reducers",
-    "middleware": "middlewares"
-}

@@ -1,6 +1,5 @@
 export function Config(name?: string): string | Object {
 	const conf = {
-        fileExtension: 'ts',
         rootFolder: 'redux',
         effect: 'effects',
         model: 'models',
@@ -11,6 +10,18 @@ export function Config(name?: string): string | Object {
     if (!name) {
         return conf;
     }
+	return conf[name] || '';
+}
 
-    return conf[name];
+export function PrivateConfig(name?: string): string | Object {
+
+    const conf = {
+        fileExtension: 'ts',
+        configFileName: '.ngdux'
+    }
+
+   	if (!name) {
+        return conf;
+    }
+	return conf[name] || '';
 }

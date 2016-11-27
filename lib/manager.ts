@@ -6,11 +6,13 @@ import { template as duckTpl } from '../blueprints/reducer/duck';
 import { template as middlewareTpl } from '../blueprints/middleware/middleware';
 import { template as modelTpl } from '../blueprints/model/model';
 import { template as ngduxTpl } from '../blueprints/ngdux/config';
+import { PrivateConfig } from './config';
 
-export class Writer {
+export class Manager {
 
 	constructor(private vorpal: any, private config: Function) {
-		this.loadConfigFile();
+		const confFile = PrivateConfig('configFileName') as string;
+		this.loadConfigFile(confFile);
 	}
 
 	private reducer = (name: string, model: boolean): string => duckTpl(name, model, this.config());
@@ -19,13 +21,13 @@ export class Writer {
 	private effect = (name: string, model: boolean): string => effectTpl(name, model, this.config());
 	private path = (template: string, path: string, name: string, def: boolean): string => 
 		(def) ?
-		`${path}/${this.config('rootFolder')}/${this.config()[template]}/${name}.${this.config('fileExtension')}`:
-		`${path}/${name}.${this.config('fileExtension')}`;
+		`${path}/${this.config('rootFolder')}/${this.config()[template]}/${name}.${PrivateConfig('fileExtension')}`:
+		`${path}/${name}.${PrivateConfig('fileExtension')}`;
 	private writeConfig = (path: string, config: Object) => this.writeFile(path, ngduxTpl(config));
 
 	private writeFile(filepath: string, text: string) {	
 		fs.writeFile(filepath, text, (err) => {
-		    if (err) { return this.vorpal.log(err); }
+		    if (err) { this.vorpal.log(err); }
 			this.vorpal.log(this.vorpal.chalk.green(`Created ${filepath} file.`));
 		});
 	}
@@ -38,8 +40,16 @@ export class Writer {
 		});
 	}
 
-	private loadConfigFile() {
-		
+	private loadConfigFile(path: string) {
+		fs.readFile(path, 'utf8', (err,data) => {
+		  	if (err) {
+			  	if (err.code === 'ENOENT') {
+					this.vorpal.log(
+						this.vorpal.chalk.yellow(`Couldn't find existing ${PrivateConfig('configFileName')} file.`)
+					);
+			  	}
+		  }
+		});
 	}
 
 	public createDir(dirname: string = this.config('rootFolder'), path: string) {

@@ -6,8 +6,8 @@ const chalk = vorpal.chalk;
 const originalPath = process.cwd();
 const ls = require('node-ls');
 import { Config } from './lib/config';
-import { Writer } from './lib/writer';
-const writer =  new Writer(vorpal, Config);
+import { Manager } from './lib/manager';
+const writer =  new Manager(vorpal, Config);
 
 function currentDirectory(currentDir: string) {
 	const splittedPath = currentDir.split('/');
