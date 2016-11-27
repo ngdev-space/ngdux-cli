@@ -17,7 +17,7 @@ It uses the amazing Vorpal lib.
 - [x] cd should change Vorpal's delimiter to the current dir
 - [x] duck, model, effect, middleware and bundle should get a path as param, fallback to defaults
 - [ ] Prompt for config values
-- [ ] Store config .ngdux file
+- [x] Store config .ngdux file
 - [ ] Lift from .ngdux config file
 - [ ] Test in Win (it probably doesn't work)
 

@@ -2,3 +2,5 @@
 *.js.map
 node_modules/
 redux/
+npm-debug.log
+.ngdux
