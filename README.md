@@ -13,7 +13,7 @@ It uses the amazing Vorpal lib.
 - [x] Basic structure (Model)
 - [x] Basic structure (Middleware)
 - [x] Extract config values to a file
-- [ ] Bundle should include model in reducer and effects
+- [x] Bundle should include model in reducer and effects
 - [x] cd should change Vorpal's delimiter to the current dir
 - [x] duck, model, effect, middleware and bundle should get a path as param, fallback to defaults
 - [ ] Prompt for config values

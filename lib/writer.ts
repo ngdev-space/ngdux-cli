@@ -6,7 +6,6 @@ import { template as duckTpl } from '../blueprints/reducer/duck';
 import { template as middlewareTpl } from '../blueprints/middleware/middleware';
 import { template as modelTpl } from '../blueprints/model/model';
 
-
 export class Writer {
 
 	constructor(private vorpal: any, private config: Function) {}
@@ -37,22 +36,22 @@ export class Writer {
 	}
 
 	writeBundle(name: string, path: string) {
-		this.write('model', name, path, true);
-		this.write('reducer', name, path, true);
-		this.write('effect', name, path, true);
+		this.write('model', name, path, true, true);
+		this.write('reducer', name, path, true, true);
+		this.write('effect', name, path, true, true);
 	}
 
-	write(template: string, name: string, path: string, def: boolean) {
+	write(template: string, name: string, path: string, def: boolean, bundle?: boolean) {
 		const lname = name.toLocaleLowerCase();
-		const compiledTemplate = this[template](lname, path);
+		const compiledTemplate = this[template](lname, bundle);
 		const filepath = this.path(template, path, lname, def);
 		this.writeFile(filepath, compiledTemplate);
 	}
 
-	private reducer = (name: string): string => duckTpl(name);
+	private reducer = (name: string, model: boolean): string => duckTpl(name, model, this.config());
 	private model = (name: string): string => modelTpl(name);
 	private middleware = (name: string): string => middlewareTpl(name);
-	private effect = (name: string): string => effectTpl(name);
+	private effect = (name: string, model: boolean): string => effectTpl(name, model, this.config());
 	private path = (template: string, path: string, name: string, def: boolean): string => 
 		(def) ?
 		`${path}/${this.config('rootFolder')}/${this.config()[template]}/${name}.${this.config('fileExtension')}`:

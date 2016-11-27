@@ -1,13 +1,15 @@
 import * as _ from 'lodash';
 
-export const template = (name: string): string => {
+export const template = (name: string, model?: boolean, config?: Object): string => {
     const nameUpper = name.toLocaleUpperCase();
     const nameCap = _.capitalize(name);
     const nameLower = name.toLocaleLowerCase();
+    const modelPath = config['model'];
 return `import { Injectable } from '@angular/core';
 import { Effect, Actions } from '@ngrx/effects';
 import { Http, Headers, URLSearchParams } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+${(model) ? 'import { ' + nameCap + ' } from \'../' + modelPath + '/' + nameLower + '\';' : ''}
 
 import {
     GET_${nameUpper}, GET_${nameUpper}_SUCCESS, GET_${nameUpper}_FAILURE,

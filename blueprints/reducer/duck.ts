@@ -1,15 +1,17 @@
 import * as _ from 'lodash';
 
-export const template = (name: string): string => {
+export const template = (name: string, model?: boolean, config?: Object): string => {
     const nameUpper = name.toLocaleUpperCase();
     const nameCap = _.capitalize(name);
     const nameLower = name.toLocaleLowerCase();
+    const modelPath = config['model'];
 return `
 import { ActionReducer, Action } from '@ngrx/store';
+${(model) ? 'import { ' + nameCap + ' } from \'../' + modelPath + '/' + nameLower + '\';' : ''}
 
 export interface ${nameCap}State {
-    ${nameLower}s: Array<any>;
-    current${nameCap}: any;
+    ${nameLower}s: Array<${nameCap}>;
+    current${nameCap}: ${nameCap};
     loading: boolean;
 };
 
@@ -46,12 +48,12 @@ export class Get${nameCap}s implements Action {
 
 export class Create${nameCap} implements Action {
     type = CREATE_${nameUpper};
-    constructor(public payload: any) { }
+    constructor(public payload: ${nameCap}) { }
 }
 
 export class Update${nameCap} implements Action {
     type = UPDATE_${nameUpper};
-    constructor(public payload: any) { }
+    constructor(public payload: ${nameCap}) { }
 }
 
 export class Delete${nameCap} implements Action {

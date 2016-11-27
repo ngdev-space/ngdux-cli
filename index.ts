@@ -9,10 +9,22 @@ import { Config } from './lib/config';
 import { Writer } from './lib/writer';
 const writer =  new Writer(vorpal, Config);
 
-
 function currentDirectory(currentDir: string) {
 	const splittedPath = currentDir.split('/');
 	return splittedPath[splittedPath.length - 1];
+}
+
+function parseDirOpts(args) {
+    let path = '';
+	if (args.options.default || !args.path) {
+        path = originalPath;
+    } else {
+        path = args.path;
+        if (path.charAt(path.length-1) === '/') {
+            path = path.slice(0, path.length - 1);
+        }
+    }
+    return path;
 }
 
 vorpal
@@ -114,16 +126,3 @@ vorpal
 vorpal
     .delimiter(chalk.magenta(`ngdux@${currentDirectory(process.cwd())}$`))
     .show();
-
-function parseDirOpts(args) {
-    let path = '';
-	if (args.options.default || !args.path) {
-        path = originalPath;
-    } else {
-        path = args.path;
-        if (path.charAt(path.length-1) === '/') {
-            path = path.slice(0, path.length - 1);
-        }
-    }
-    return path;
-}
