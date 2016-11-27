@@ -1,5 +1,7 @@
-export function Config(name?: string): string | Object {
-	const conf = {
+import * as _ from 'lodash';
+
+export class Config {
+	private static conf: Object = {
         rootFolder: 'redux',
         effect: 'effects',
         model: 'models',
@@ -7,21 +9,35 @@ export function Config(name?: string): string | Object {
         middleware: 'middlewares'
     }
 
-    if (!name) {
-        return conf;
+   	static extendConf(conf: Object) {
+		this.conf = _.assign({}, Config.getConfig(), conf);
     }
-	return conf[name] || '';
+
+    static getConfig(): Object {
+        return this.conf;
+    }
+
+    static getItem(name: string): string {
+        return this.conf[name] || '';
+    }
 }
 
-export function PrivateConfig(name?: string): string | Object {
 
-    const conf = {
+export class PrivateConfig {
+	private static conf: Object = {
         fileExtension: 'ts',
         configFileName: '.ngdux'
     }
 
-   	if (!name) {
-        return conf;
+   	static extendConf(conf: Object) {
+		this.conf = _.assign({}, Config.getConfig(), conf);
     }
-	return conf[name] || '';
+
+    static getConfig(): Object {
+        return this.conf;
+    }
+
+    static getItem(name: string): string {
+        return this.conf[name] || '';
+    }
 }

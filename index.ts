@@ -7,44 +7,63 @@ const originalPath = process.cwd();
 const ls = require('node-ls');
 import { Config } from './lib/config';
 import { Manager } from './lib/manager';
-const writer =  new Manager(vorpal, Config);
+import { currentDirectory, parseDirOpts } from './lib/utils';
+const manager =  new Manager(vorpal);
 
-function currentDirectory(currentDir: string) {
-	const splittedPath = currentDir.split('/');
-	return splittedPath[splittedPath.length - 1];
-}
-
-function parseDirOpts(args) {
-    let path = '';
-	if (args.options.default || !args.path) {
-        path = originalPath;
-    } else {
-        path = args.path;
-        if (path.charAt(path.length-1) === '/') {
-            path = path.slice(0, path.length - 1);
-        }
-    }
-    return path;
-}
 
 vorpal
     .command('init [name] [path]', 'Creates a "redux" directory that contains reducers and effects folders')
     .alias('i')
+    .option('-d, --default', 'Use defaults for folder structure')
     .autocomplete(fsAutocomplete({ directory: true }))
-    .action(function(args, callback) {
-        writer.createDir(args.name, args.path || originalPath);
-        callback();
+    .action((args, callback) => {
+        if (!args.name && !args.options.default) {
+            vorpal.activeCommand.log(chalk.yellow('Please provide the [name] param or -d flag'));
+            return callback();
+        }
+
+        if (!args.options.default) {
+	        vorpal.activeCommand.prompt([
+	            {
+				      type: 'input',
+				      name: 'effect',
+				      message: `Pick a name for your "effects" folder (default: ${Config.getItem('effect')})`,
+		    	},
+	            {
+				      type: 'input',
+				      name: 'model',
+				      message: `Pick a name for your "models" folder (default: ${Config.getItem('model')})`,
+		    	},
+	            {
+				      type: 'input',
+				      name: 'reducer',
+				      message: `Pick a name for your "reducers" folder (default: ${Config.getItem('reducer')})`,
+		    	},
+	            {
+				      type: 'input',
+				      name: 'middleware',
+				      message: `Pick a name for your "middlewares" folder (default: ${Config.getItem('middleware')})`,
+		    	}
+	        ], (result) => {
+                result.rootFolder = args.name;
+	            manager.createDir(args.name, args.path || originalPath, result);
+		      	callback();
+		    });
+    	} else {
+            manager.createDir(args.name, args.path || originalPath, {});
+            callback();
+        }
     });
 
 vorpal
     .command('ls', 'List current dir files')
     .option('--all', 'List all files.')
-    .action(function(args, callback) {
+    .action((args, callback) => {
         let opt = '';
         if (args.options && args.options.all) {
 			opt = '--all';
         }
-        ls(process.cwd(), opt, function(err, list) {
+        ls(process.cwd(), opt, (err, list) => {
 		  	// here you could get a files list of the current directory 
           	list.map((item) => vorpal.log(item));
         	callback();
@@ -54,7 +73,7 @@ vorpal
 vorpal
     .command('cd [path]', 'Creates a "middleware" file ')
   	.autocomplete(fsAutocomplete({ directory: false }))
-    .action(function(args, callback) {
+    .action((args, callback) => {
         try {
         	process.chdir(`${process.cwd()}/${args.path}/`);
         } catch (e) {
@@ -74,8 +93,8 @@ vorpal
     .command('bundle [name] [path]', 'Creates a bundle')
     .alias('b')
     .autocomplete(fsAutocomplete({ directory: true }))
-    .action(function(args, callback) {
-        writer.writeBundle(args.name, args.path || originalPath)
+    .action((args, callback) => {
+        manager.writeBundle(args.name, args.path || originalPath)
         callback();
     });
 
@@ -84,9 +103,9 @@ vorpal
     .alias('d')
     .autocomplete(fsAutocomplete({ directory: true }))
     .option('-d, --default', 'default path')
-    .action(function(args, callback) {
-        let path = parseDirOpts(args);
-        writer.write('reducer', args.name, path, args.options.d);
+    .action((args, callback) => {
+        let path = parseDirOpts(args, originalPath);
+        manager.write('reducer', args.name, path, args.options.d);
         callback();
     });
 
@@ -95,9 +114,9 @@ vorpal
     .alias('e')
     .autocomplete(fsAutocomplete({ directory: true }))
     .option('-d, --default', 'default path')
-    .action(function(args, callback) {
-        let path = parseDirOpts(args);
-        writer.write('effect', args.name, path, args.options.d);
+    .action((args, callback) => {
+        let path = parseDirOpts(args, originalPath);
+        manager.write('effect', args.name, path, args.options.d);
         callback();
     });
 
@@ -106,9 +125,9 @@ vorpal
     .alias('m')
     .autocomplete(fsAutocomplete({ directory: true }))
     .option('-d, --default', 'default path')
-    .action(function(args, callback) {
-        let path = parseDirOpts(args);
-        writer.write('model', args.name, path, args.options.d);
+    .action((args, callback) => {
+        let path = parseDirOpts(args, originalPath);
+        manager.write('model', args.name, path, args.options.d);
         callback();
     });
 
@@ -117,9 +136,9 @@ vorpal
     .alias('mw')
     .autocomplete(fsAutocomplete({ directory: true }))
     .option('-d, --default', 'default path')
-    .action(function(args, callback) {
-        let path = parseDirOpts(args);
-        writer.write('middleware', args.name, path, !!(args.options.default));
+    .action((args, callback) => {
+        let path = parseDirOpts(args, originalPath);
+        manager.write('middleware', args.name, path, !!(args.options.default));
         callback();
     });
 

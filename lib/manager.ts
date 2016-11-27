@@ -6,23 +6,23 @@ import { template as duckTpl } from '../blueprints/reducer/duck';
 import { template as middlewareTpl } from '../blueprints/middleware/middleware';
 import { template as modelTpl } from '../blueprints/model/model';
 import { template as ngduxTpl } from '../blueprints/ngdux/config';
-import { PrivateConfig } from './config';
+import { PrivateConfig, Config } from './config';
 
 export class Manager {
 
-	constructor(private vorpal: any, private config: Function) {
-		const confFile = PrivateConfig('configFileName') as string;
+	constructor(private vorpal: any) {
+		const confFile = PrivateConfig.getItem('configFileName');
 		this.loadConfigFile(confFile);
 	}
 
-	private reducer = (name: string, model: boolean): string => duckTpl(name, model, this.config());
+	private reducer = (name: string, model: boolean): string => duckTpl(name, model, Config.getConfig());
 	private model = (name: string): string => modelTpl(name);
 	private middleware = (name: string): string => middlewareTpl(name);
-	private effect = (name: string, model: boolean): string => effectTpl(name, model, this.config());
+	private effect = (name: string, model: boolean): string => effectTpl(name, model, Config.getConfig());
 	private path = (template: string, path: string, name: string, def: boolean): string => 
 		(def) ?
-		`${path}/${this.config('rootFolder')}/${this.config()[template]}/${name}.${PrivateConfig('fileExtension')}`:
-		`${path}/${name}.${PrivateConfig('fileExtension')}`;
+		`${path}/${Config.getItem('rootFolder')}/${Config.getConfig()[template]}/${name}.${PrivateConfig.getItem('fileExtension')}`:
+		`${path}/${name}.${PrivateConfig.getItem('fileExtension')}`;
 	private writeConfig = (path: string, config: Object) => this.writeFile(path, ngduxTpl(config));
 
 	private writeFile(filepath: string, text: string) {	
@@ -41,25 +41,29 @@ export class Manager {
 	}
 
 	private loadConfigFile(path: string) {
-		fs.readFile(path, 'utf8', (err,data) => {
+		fs.readFile(path, 'utf8', (err, data) => {
 		  	if (err) {
 			  	if (err.code === 'ENOENT') {
 					this.vorpal.log(
-						this.vorpal.chalk.yellow(`Couldn't find existing ${PrivateConfig('configFileName')} file.`)
+						this.vorpal.chalk.yellow(`Couldn't find existing ${PrivateConfig.getItem('configFileName')} file.`)
 					);
 			  	}
-		  }
+			} else {
+				console.log(JSON.parse(data));
+				Config.extendConf(JSON.parse(data));
+			}
 		});
 	}
 
-	public createDir(dirname: string = this.config('rootFolder'), path: string) {
-		this.writeConfig(`${path}/.ngdux`, {});
+	public createDir(dirname: string = Config.getItem('rootFolder'), path: string, opts: Object) {
+		Config.extendConf(opts);
+		this.writeConfig(`${path}/.ngdux`, opts);
 		const dirPath = `${path}/${dirname}`;
 		this.makeDir(dirPath, () => {
-			this.makeDir(`${dirPath}/${this.config('reducer')}`);
-			this.makeDir(`${dirPath}/${this.config('model')}`);
-			this.makeDir(`${dirPath}/${this.config('middleware')}`);
-			this.makeDir(`${dirPath}/${this.config('effect')}`);
+			this.makeDir(`${dirPath}/${Config.getItem('reducer')}`);
+			this.makeDir(`${dirPath}/${Config.getItem('model')}`);
+			this.makeDir(`${dirPath}/${Config.getItem('middleware')}`);
+			this.makeDir(`${dirPath}/${Config.getItem('effect')}`);
 		});
 	}
 
