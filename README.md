@@ -6,6 +6,44 @@ This is an attempt to automate the process of creating ngrx/* ducks, effects, mo
 
 It uses the amazing Vorpal lib.
 
+## Available Commands
+
+`init` 
+
+### Alias
+
+### Options
+
+`bundle` 
+
+### Alias
+
+### Options
+
+`duck` 
+
+### Alias
+
+### Options
+
+`model` 
+
+### Alias
+
+### Options
+
+`effect` 
+
+### Alias
+
+### Options
+
+`middleware` 
+
+### Alias
+
+### Options
+
 ## TODO
 - [x] Basic commands (`duck`, `model`, `effect`, `middleware`, `ls`, `cd`, `init`, `bundle`)
 - [x] Basic structure (Duck)
@@ -19,6 +57,10 @@ It uses the amazing Vorpal lib.
 - [x] Prompt for config values
 - [x] Store config .ngdux file
 - [x] Lift from .ngdux config file
-- [ ] `init` should be able to execute from any folder in the structure
+- [ ] `init` should be able to execute using any path
+- [ ] `bundle` should work with custom path
+- [ ] Default values should be stored somewhere so we can use them instead of the .ngdux ones when using `-d`
+- [ ] Add tests
 - [ ] Test in Win (it probably doesn't work)
+
 

@@ -7,7 +7,7 @@ const originalPath = process.cwd();
 const ls = require('node-ls');
 import { Config } from './lib/config';
 import { Manager } from './lib/manager';
-import { currentDirectory, parseDirOpts } from './lib/utils';
+import { currentDirectory, parseDirOpts, cleanPath } from './lib/utils';
 const manager =  new Manager(vorpal);
 
 
@@ -46,11 +46,12 @@ vorpal
 		    	}
 	        ], (result) => {
                 result.rootFolder = args.name;
-	            manager.createDir(args.name, args.path || originalPath, result);
+                let path = parseDirOpts(args, originalPath);
+	            manager.createDir(args.name, path, result, originalPath);
 		      	callback();
 		    });
     	} else {
-            manager.createDir(args.name, args.path || originalPath, {});
+            manager.createDir(args.name, args.path || originalPath, {}, originalPath);
             callback();
         }
     });

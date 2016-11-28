@@ -55,9 +55,9 @@ export class Manager {
 		});
 	}
 
-	public createDir(dirname: string = Config.getItem('rootFolder'), path: string, opts: Object) {
+	public createDir(dirname: string = Config.getItem('rootFolder'), path: string, opts: Object, originalPath: string) {
 		Config.extendConf(opts);
-		this.writeConfig(`${path}/.ngdux`, opts);
+		this.writeConfig(`${originalPath}/.ngdux`, opts);
 		const dirPath = `${path}/${dirname}`;
 		this.makeDir(dirPath, () => {
 			this.makeDir(`${dirPath}/${Config.getItem('reducer')}`);
